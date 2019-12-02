@@ -1,0 +1,81 @@
+---
+title: "RealEstate"
+output: word_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r}
+library(alr4)
+library(readxl)
+#Real_estate_valuation_data_set <- read_excel("Downloads/Real estate valuation data set.xlsx")
+attach(Real_estate_valuation_data_set)
+Y<-Real_estate_valuation_data_set$`Y house price of unit area`
+X1<-Real_estate_valuation_data_set$`X1 transaction date`
+X2<-Real_estate_valuation_data_set$`X2 house age`
+X3<-Real_estate_valuation_data_set$`X3 distance to the nearest MRT station`
+X4<-Real_estate_valuation_data_set$`X4 number of convenience stores`
+X5<-Real_estate_valuation_data_set$`X5 latitude`
+X6<-Real_estate_valuation_data_set$`X6 longitude`
+realestate.lm <- lm(Y ~ X1 + X2 + X3 + X4 + X5 + X6)
+summary(realestate.lm)
+pairs(Y ~ X1 + X2 + X3 + X4 + X5 + X6)
+
+
+e <- resid(realestate.lm)
+yhat2 <- fitted(realestate.lm)
+plot(yhat2, e, xlab = 'Fitted Value', ylab = 'Residuals', main = 'Residuals vs Fitted Values')
+abline(h = 0, lty = 2)
+
+qqnorm(e, ylim = c(-9, 9))
+qqline(e)
+avPlots(realestate.lm, id = FALSE)
+anova(realestate.lm)
+```
+
+```{r}
+boxplot(Y~X1, data = Real_estate_valuation_data_set, main = "Real Estate Data", xlab = "Transaction Date", ylab = "House Price")
+
+boxplot(Y~X2, data = Real_estate_valuation_data_set, main = "Real Estate Data", xlab = "House Age", ylab = "House Price")
+
+boxplot(Y~X3, data = Real_estate_valuation_data_set, main = "Real Estate Data", xlab = "Distance to the Nearest MRT Station", ylab = "House Price")
+
+boxplot(Y~X4, data = Real_estate_valuation_data_set, main = "Real Estate Data", xlab = "Number of Convenience Stores", ylab = "House Price")
+
+boxplot(Y~X5, data = Real_estate_valuation_data_set, main = "Real Estate Data", xlab = "Latitude", ylab = "House Price")
+
+boxplot(Y~X6, data = Real_estate_valuation_data_set, main = "Real Estate Data", xlab = "Longitude", ylab = "House Price")
+```
+
+From the BoxPlots, it seems as though Latitude and Longitude are very random. 
+
+```{r}
+summary(X1)
+summary(X2)
+summary(X3)
+summary(X4)
+
+Real_estate_valuation_data_set$X21 <- with(Real_estate_valuation_data_set, (X2  + 1))
+Real_estate_valuation_data_set$X41 <- with(Real_estate_valuation_data_set, (X4 + 1))
+Trans.Real_estate_valuation_data_set <- powerTransform(cbind(X1, X21, X3, X41) ~ 1, Real_estate_valuation_data_set)
+summary(Trans.Real_estate_valuation_data_set)
+```
+
+```{r}
+realestate.lm <- lm(Y ~ X1 + sqrt(X2) + log(X3) + I(X4^(0.69)))
+summary(realestate.lm)
+
+
+e <- resid(realestate.lm)
+yhat2 <- fitted(realestate.lm)
+plot(yhat2, e, xlab = 'Fitted Value', ylab = 'Residuals', main = 'Residuals vs Fitted Values')
+abline(h = 0, lty = 2)
+
+qqnorm(e, ylim = c(-9, 9))
+qqline(e)
+avPlots(realestate.lm, id = FALSE)
+anova(realestate.lm)
+```
